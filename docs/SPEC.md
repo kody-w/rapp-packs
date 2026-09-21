@@ -97,3 +97,64 @@ a mock, never the fixture the pack author wrote. It MUST prove, per pack:
 9. **safe mode**: with `SAFE-MODE` present → `/health` identical to the pure grail
 10. **upgrade survival**: replace the grail tree with a fresh checkout → packs still installed,
     grafts re-apply on next boot
+
+---
+
+# v1.1 amendments — the Hermes lessons
+
+Four corrections, each from a failure mode another ecosystem already paid for.
+
+## 6. Generations and automatic rollback (the OTA lesson)
+
+Every over-the-air update system that ships code to machines it cannot see learns the same
+thing: a bad bundle that only fails at boot is indistinguishable from a bricked host. Manual
+safe mode is not enough — the person who would flip it is exactly the person who cannot reach
+the machine.
+
+- The manager keeps **generations**, not "latest": the previous pack set stays on disk under
+  `~/.brainstem/packs/generations/<n>/`. Revert is a file move, instant and offline.
+- `~/.brainstem/packs/boot.json` records a **boot counter**, bumped when packs load and
+  cleared once the brainstem answers a real request. Three consecutive bumps without a clear
+  → the manager **automatically reverts to the last known good generation** and writes why to
+  `grafts.log`. No human, no network.
+- `installed.json` names the current generation; a rollback is itself recorded, never silent.
+
+## 7. Gate on the host version — and re-gate after an upgrade
+
+`requires.brainstem` is currently decorative. It MUST be enforced at install, and **re-checked
+on every boot**: a grail upgrade can move the host out from under a pack that was installed
+legitimately. A pack whose range no longer matches goes **inert with a reason** (listed in
+`status`, not loaded), never left to explode against a changed seam. A graft that cannot find
+its anchor is the same event and takes the same path.
+
+## 8. Rings, not one channel (reuse the estate's word)
+
+The estate already ships on `alpha / beta / canary / nightly`. The channel adopts that
+vocabulary rather than inventing one: every pack version declares a `ring`, the manager is
+pinned to a ring (default `beta`), and `index.json` carries all rings so one fetch answers
+"what would I get on canary". Do not coin a new word for a thing the estate already names.
+
+## 9. Sign the index, pin the key (the supply-chain lesson)
+
+An auto-update channel that writes executable Python onto a machine IS the attack surface —
+digests rooted in a URL only prove the bytes match what that URL said.
+
+- `channel/index.json` is accompanied by `channel/index.sig` (detached signature).
+- First install pins the channel's public key (TOFU) into `~/.brainstem/packs/channel.key`.
+  A later index signed by a different key is **refused**, loudly, and never written — a key
+  change is a human decision, not an auto-update.
+- Unchanged and non-negotiable: fail closed on every mismatch, allowlist the channel host,
+  refuse cross-host redirects, and never ship a credential inside a pack.
+
+## 10. A pack is a capability, not a brainstem file drop (the membrane lesson)
+
+Canon: *"How can we layer a functioning brainstem over anything else (Hermes, openclaw, open
+human) without killing that organism."* A channel that can only feed a RAPP brainstem narrows
+that on day one.
+
+- `pack.json` declares `"hosts": ["brainstem"]` — and the format stays projectable: an agent
+  file is already convertible to `SKILL.md` / openclaw / openrappter by `agentshim.py`
+  (canonical copy in `rapp-tower/tools/`), with its RCI capsule carrying byte-exact fidelity
+  both ways.
+- Grafts are the exception and must say so: a graft patches a specific host's live module, so
+  it declares its host explicitly and refuses to apply anywhere else.
