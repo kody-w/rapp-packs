@@ -1,0 +1,95 @@
+name: channel
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          # 3.9 is the floor every pack and the manager must run on. Prove it here so a
+          # 3.10+ syntax slip cannot reach an installed brainstem.
+          python-version: '3.9'
+
+      - name: Ed25519 self-test (RFC 8032 vector 1)
+        # The whole channel's integrity story rests on this one primitive, so a broken
+        # crypto edit must not merge.
+        run: |
+          python3 - <<'PY'
+          import binascii, importlib.util, pathlib
+          spec = importlib.util.spec_from_file_location("ed", pathlib.Path("tools/ed25519_pure.py"))
+          ed = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(ed)
+          seed = binascii.unhexlify("9d61b19deffd5a60ba844af492ec2cc44449c5697b326919703bac031cae7f60")
+          pub = binascii.hexlify(ed.public_key_from_seed(seed)).decode()
+          want = "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"
+          assert pub == want, "RFC 8032 test vector 1 FAILED: %s != %s" % (pub, want)
+          msg = b"rapp-packs"
+          sig = ed.sign(seed, msg)
+          assert ed.verify(ed.public_key_from_seed(seed), msg, sig) is True
+          assert ed.verify(ed.public_key_from_seed(seed), msg + b"x", sig) is False
+          print("ed25519: RFC 8032 vector 1 OK, sign/verify OK, tamper rejected")
+          PY
+
+      - name: Verify packs
+        run: python3 tools/verify_pack.py
+
+      - name: Check committed channel bytes and signature
+        id: channel_check
+        shell: bash
+        run: python3 tools/build_channel.py --check > "$RUNNER_TEMP/channel-check.diff" 2>&1
+
+      - name: Print channel diff on failure
+        if: ${{ failure() && steps.channel_check.outcome == 'failure' }}
+        run: cat "$RUNNER_TEMP/channel-check.diff"
+
+      - name: Check bootstrap syntax
+        run: bash -n bootstrap.sh
+
+      - name: No private key material may be tracked
+        run: |
+          python3 - <<'PY'
+          import re, subprocess, sys
+          tracked = subprocess.run(
+              ["git", "ls-files"], capture_output=True, text=True, check=True
+          ).stdout.split()
+          bad = [p for p in tracked
+                 if re.search(r"(channel-signing\.key|\.key$|seed\.hex|\.pem$)", p)]
+          if bad:
+              print("refused: private key material is tracked: " + ", ".join(bad))
+              sys.exit(1)
+          print("no private key material tracked")
+          PY
+
+  pages:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+      contents: read
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+      - uses: actions/deploy-pages@v4
+        id: deployment

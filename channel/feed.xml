@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>rapp-packs channel</title>
+  <link rel="self" href="https://kody-w.github.io/rapp-packs/channel/feed.xml"/>
+  <link rel="alternate" href="https://kody-w.github.io/rapp-packs/"/>
+  <id>https://kody-w.github.io/rapp-packs/</id>
+  <updated>2026-09-21T01:16:52Z</updated>
+  <entry>
+    <title>Packs 1.0.0 (beta)</title>
+    <id>https://kody-w.github.io/rapp-packs/packs/pack-manager/#beta-1.0.0</id>
+    <link rel="alternate" href="https://kody-w.github.io/rapp-packs/packs/pack-manager/pack.json"/>
+    <updated>2026-09-21T01:05:42Z</updated>
+    <summary type="text">Install, update, pin, revert and remove brainstem packs from the signed rapp-packs channel — every byte verified before it is written.</summary>
+    <category term="pack"/>
+    <category term="beta" label="ring"/>
+  </entry>
+</feed>
