@@ -1,0 +1,17 @@
+{
+  "base": "https://kody-w.github.io/rapp-packs/",
+  "generated": "2026-09-21T01:05:42Z",
+  "packs": [
+    {
+      "kind": "pack",
+      "manifest": "packs/pack-manager/pack.json",
+      "manifest_sha256": "3325b6beb44b18ece2e7d7952fa9f53ac459e826031644bb2206e0da43c04f05",
+      "name": "pack-manager",
+      "released": "2026-09-21T01:05:42Z",
+      "ring": "beta",
+      "summary": "Install, update, pin, revert and remove brainstem packs from the signed rapp-packs channel — every byte verified before it is written.",
+      "version": "1.0.0"
+    }
+  ],
+  "schema": "rapp-channel/1"
+}
