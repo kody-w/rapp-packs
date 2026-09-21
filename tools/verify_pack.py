@@ -52,6 +52,10 @@ ASSIGNMENT_RE = re.compile(
     r"""(?:[rubf]{0,2})?(?P<quote>\"\"\"|'''|"|')(?P<value>.*?)(?P=quote)""",
     re.IGNORECASE | re.DOTALL,
 )
+# An endpoint URL is not a secret. GH_TOKEN_EXCHANGE = "https://.../v2/token" tripped the
+# name rule on the word "token" in its PATH, which would force every pack that names an
+# auth endpoint to either rename its constant or carry a waiver.
+URLISH_RE = re.compile(r"^(https?|wss?)://", re.IGNORECASE)
 SECRET_NAME_RE = re.compile(r"token|secret|password|passwd|api_?key|credential", re.IGNORECASE)
 PLACEHOLDERS = ("xxx", "<", "your", "example", "replace", "changeme", "...")
 
@@ -99,9 +103,22 @@ def check_manifest(manifest, pack_dir, trees):
         if not isinstance(installed, str) or not channel.relative_source_path(source):
             continue
         tree = trees.get(pack_dir / source)
-        if not fnmatch.fnmatchcase(installed, "*_agent.py") or tree is None:
+        # Entry points are what the host EXECUTES: an agent file the loader sweeps, and a
+        # graft module the graft engine discovers. Both may legitimately import a module the
+        # pack vendors, so both contribute to the set of justified imports. Collecting from
+        # agents alone made every graft's helper look stray.
+        role = entry.get("role")
+        is_entry_point = fnmatch.fnmatchcase(installed, "*_agent.py") or role in ("agent", "graft")
+        if not is_entry_point or tree is None:
             continue
         for node in ast.walk(tree):
+            # A pack cannot rely on `import helper`: the host only puts <brainstem_dir>/agents
+            # on sys.path, so a relocated AGENTS_PATH breaks plain imports. The working idiom
+            # is importlib.util.spec_from_file_location with the sibling's FILENAME as a
+            # literal. Count that literal as a reference, or every correct pack looks stray.
+            if isinstance(node, ast.Constant) and isinstance(node.value, str):
+                if node.value.endswith(".py"):
+                    imports.add(Path(node.value).stem)
             if isinstance(node, ast.Import):
                 imports.update(alias.name.split(".")[0] for alias in node.names)
             elif isinstance(node, ast.ImportFrom) and node.level <= 1:
@@ -126,6 +143,12 @@ def check_manifest(manifest, pack_dir, trees):
         if installed.casefold() in installed_names:
             errors.append(channel.violation(path, "manifest-schema", "duplicate install_as filename"))
         installed_names.add(installed.casefold())
+        role = entry.get("role") if isinstance(entry, dict) else None
+        # A graft module is discovered by the graft engine at runtime, so it is neither an
+        # agent nor statically imported by one. It is legitimate ONLY when the pack declares
+        # kind "graft" AND names the file's role, so "stray" stays a real finding elsewhere.
+        if role == "graft" and manifest.get("kind") == "graft":
+            continue
         if not fnmatch.fnmatchcase(installed, "*_agent.py") and Path(installed).stem not in imports:
             errors.append(
                 channel.violation(path, "stray-file", "installed file is neither an agent nor its imported module")
@@ -539,6 +562,7 @@ def credential_findings(sources, trees=None):
             if (
                 SECRET_NAME_RE.search(match.group("name"))
                 and len(value) >= 20
+                and not URLISH_RE.match(value.strip().strip("\"'"))
                 and not any(part in value.casefold() for part in PLACEHOLDERS)
             ):
                 findings.append(
@@ -561,7 +585,8 @@ def credential_findings(sources, trees=None):
             value = node.value.value
             targets = node.targets if isinstance(node, ast.Assign) else [node.target]
             if (
-                len(value) >= 20 and not any(part in value.casefold() for part in PLACEHOLDERS)
+                len(value) >= 20 and not URLISH_RE.match(value.strip())
+                and not any(part in value.casefold() for part in PLACEHOLDERS)
                 and any(SECRET_NAME_RE.search(symbol(target)) for target in targets)
             ):
                 findings.append((path, node.lineno, "credential assignment", value))

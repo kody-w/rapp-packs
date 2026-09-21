@@ -13,17 +13,20 @@
     {
       "path": "astra_model_graft.py",
       "sha256": "9827105d8ecc21b13d6b2a07489086dff7cfae588bea90b419e805019a23291c",
-      "install_as": "astra_model_graft.py"
+      "install_as": "astra_model_graft.py",
+      "role": "graft"
     },
     {
       "path": "astra_responses.py",
       "sha256": "f60575f50fc92c32eb7f87b55ac678b6fba13c59c62bc358f1525f390bbd2ee3",
-      "install_as": "astra_responses.py"
+      "install_as": "astra_responses.py",
+      "role": "module"
     }
   ],
   "requires": {
     "brainstem": ">=0.6.0",
-    "python": ">=3.9"
+    "python": ">=3.9",
+    "pack": "graft-engine>=1.0.0"
   },
   "provides": [],
   "grafts": [

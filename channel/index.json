@@ -1,7 +1,37 @@
 {
   "base": "https://kody-w.github.io/rapp-packs/",
-  "generated": "2026-09-21T01:16:52Z",
+  "generated": "2026-09-21T01:24:25Z",
   "packs": [
+    {
+      "kind": "graft",
+      "manifest": "packs/graft-astra-model/pack.json",
+      "manifest_sha256": "01bc4a42d13a0ba18c168db60c05d9a85c6b68f110503d8c865afb23155fba10",
+      "name": "graft-astra-model",
+      "released": "2026-09-21T01:24:25Z",
+      "ring": "beta",
+      "summary": "Makes gpt-6-astra a first-class model of the running brainstem: injects it into the live model picker and routes its requests to POST {endpoint}/responses, because Astra advertises no /chat/completions route. The grail's endpoint filter is left intact. Requires the graft-engine pack.",
+      "version": "1.0.0"
+    },
+    {
+      "kind": "graft",
+      "manifest": "packs/graft-engine/pack.json",
+      "manifest_sha256": "3b18d0819106171547bbe1f5faa2859b3b48579bbf4bc424fc524128d4a3505b",
+      "name": "graft-engine",
+      "released": "2026-09-21T01:24:25Z",
+      "ring": "beta",
+      "summary": "Discovers, applies and reports grafts - modules that patch the RUNNING brainstem without editing a byte of the grail. Adds the Grafts agent (status / apply / revert / log). Every other graft pack requires this one.",
+      "version": "1.0.0"
+    },
+    {
+      "kind": "graft",
+      "manifest": "packs/graft-hello/pack.json",
+      "manifest_sha256": "62192c6db4a5e1f82c3fa5aa599bfbb5e0b5331fdcbcc382b7866c5bf006dc28",
+      "name": "graft-hello",
+      "released": "2026-09-21T01:24:25Z",
+      "ring": "beta",
+      "summary": "The reference graft: adds one marker attribute to the running brainstem and nothing else, so the conformance suite has something trivial to prove idempotence, safe mode and revert against. Requires the graft-engine pack.",
+      "version": "1.0.0"
+    },
     {
       "kind": "pack",
       "manifest": "packs/pack-manager/pack.json",

@@ -13,12 +13,14 @@
     {
       "path": "graft_agent.py",
       "sha256": "757b37e95b28e7170d69f247a71f9f728e37de2f7ba89c1ffacab2e5b911b1b1",
-      "install_as": "graft_agent.py"
+      "install_as": "graft_agent.py",
+      "role": "agent"
     },
     {
       "path": "graft_runtime.py",
       "sha256": "8a25957a7c78281f74d66000c2a30226f6d3ae16d9196beddc85feff008079c7",
-      "install_as": "graft_runtime.py"
+      "install_as": "graft_runtime.py",
+      "role": "module"
     }
   ],
   "requires": {

@@ -4,7 +4,34 @@
   <link rel="self" href="https://kody-w.github.io/rapp-packs/channel/feed.xml"/>
   <link rel="alternate" href="https://kody-w.github.io/rapp-packs/"/>
   <id>https://kody-w.github.io/rapp-packs/</id>
-  <updated>2026-09-21T01:16:52Z</updated>
+  <updated>2026-09-21T01:24:25Z</updated>
+  <entry>
+    <title>Hello Graft 1.0.0 (beta)</title>
+    <id>https://kody-w.github.io/rapp-packs/packs/graft-hello/#beta-1.0.0</id>
+    <link rel="alternate" href="https://kody-w.github.io/rapp-packs/packs/graft-hello/pack.json"/>
+    <updated>2026-09-21T01:24:25Z</updated>
+    <summary type="text">The reference graft: adds one marker attribute to the running brainstem and nothing else, so the conformance suite has something trivial to prove idempotence, safe mode and revert against. Requires the graft-engine pack.</summary>
+    <category term="graft"/>
+    <category term="beta" label="ring"/>
+  </entry>
+  <entry>
+    <title>Graft Engine 1.0.0 (beta)</title>
+    <id>https://kody-w.github.io/rapp-packs/packs/graft-engine/#beta-1.0.0</id>
+    <link rel="alternate" href="https://kody-w.github.io/rapp-packs/packs/graft-engine/pack.json"/>
+    <updated>2026-09-21T01:24:25Z</updated>
+    <summary type="text">Discovers, applies and reports grafts - modules that patch the RUNNING brainstem without editing a byte of the grail. Adds the Grafts agent (status / apply / revert / log). Every other graft pack requires this one.</summary>
+    <category term="graft"/>
+    <category term="beta" label="ring"/>
+  </entry>
+  <entry>
+    <title>GPT-6 Astra (Responses API) 1.0.0 (beta)</title>
+    <id>https://kody-w.github.io/rapp-packs/packs/graft-astra-model/#beta-1.0.0</id>
+    <link rel="alternate" href="https://kody-w.github.io/rapp-packs/packs/graft-astra-model/pack.json"/>
+    <updated>2026-09-21T01:24:25Z</updated>
+    <summary type="text">Makes gpt-6-astra a first-class model of the running brainstem: injects it into the live model picker and routes its requests to POST {endpoint}/responses, because Astra advertises no /chat/completions route. The grail's endpoint filter is left intact. Requires the graft-engine pack.</summary>
+    <category term="graft"/>
+    <category term="beta" label="ring"/>
+  </entry>
   <entry>
     <title>Packs 1.0.0 (beta)</title>
     <id>https://kody-w.github.io/rapp-packs/packs/pack-manager/#beta-1.0.0</id>
