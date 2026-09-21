@@ -1,0 +1,29 @@
+{
+  "schema": "rapp-pack/1",
+  "name": "graft-hello",
+  "version": "1.0.0",
+  "kind": "graft",
+  "ring": "beta",
+  "hosts": [
+    "brainstem"
+  ],
+  "display_name": "Hello Graft",
+  "summary": "The reference graft: adds one marker attribute to the running brainstem and nothing else, so the conformance suite has something trivial to prove idempotence, safe mode and revert against. Requires the graft-engine pack.",
+  "files": [
+    {
+      "path": "hello_graft.py",
+      "sha256": "e1bfc0f37ad10db2b81a207fa3d99e65838ef08066fd8ddf67ffa208d506a5e3",
+      "install_as": "hello_graft.py"
+    }
+  ],
+  "requires": {
+    "brainstem": ">=0.6.0",
+    "python": ">=3.9"
+  },
+  "provides": [],
+  "grafts": [
+    "hello"
+  ],
+  "credentials": [],
+  "revert": "delete hello_graft.py; the marker attribute disappears on the next boot"
+}
