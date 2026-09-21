@@ -5,7 +5,7 @@
     {
       "install_as": "pack_agent.py",
       "path": "pack_agent.py",
-      "sha256": "fe101ca94d8e9a5936855358c5951fc61921263b7bbae09c3098c52353c2c410"
+      "sha256": "0582c52c81335b419a69d6b6cbbb02180109d8ffeed387a3f86470a1ffd44c4e"
     }
   ],
   "grafts": [],

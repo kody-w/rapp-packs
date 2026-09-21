@@ -930,6 +930,7 @@ def boot_observe():
             _log(note)
     # Reset either way: a failing revert must not loop on every boot.
     boot["dirty_boots"] = 0
+    boot["generation"] = load_installed().get("generation")
     boot["last_action"] = note
     boot["last_action_at"] = _now()
     _atomic_write_json(_p("boot.json"), boot)
