@@ -158,3 +158,51 @@ that on day one.
   both ways.
 - Grafts are the exception and must say so: a graft patches a specific host's live module, so
   it declares its host explicitly and refuses to apply anywhere else.
+
+---
+
+# v1.2 — how the host actually re-imports agents (verified, and it changes §4)
+
+Read `_load_agent_from_file()` in `brainstem.py`. It does NOT use the import cache:
+
+    mod_name = f"agent_{os.path.basename(filepath).replace('.', '_')}_{id(filepath)}_{attempt}"
+    spec = importlib.util.spec_from_file_location(mod_name, filepath)
+    mod  = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+
+A unique module name per load means **the module body is re-executed on every `load_agents()`
+sweep, and that sweep runs on every `/chat` turn** — not once per boot. Three rules follow, and
+they override the looser wording in §4:
+
+## 4.1 Idempotence state MUST live on the host, never in the graft module
+
+The graft's own globals are discarded and rebuilt every turn, so a module-level
+`_applied = True` guard is worthless — it is `False` again on the next message. The marker
+belongs on the thing that survives: an attribute on `sys.modules["__main__"]` (e.g.
+`__main__.__grafts_applied__`, a dict keyed by `GRAFT_ID` → version), or on the wrapped function
+object itself (`fn.__graft__ = GRAFT_ID`). `verify()` MUST read that same marker.
+
+Check BOTH before wrapping: the host marker says "some version of this graft is applied", the
+function attribute says "this exact object is already wrapped". They disagree when a grail upgrade
+replaced the function under a marker that survived — treat disagreement as "not applied" and
+re-wrap the fresh object.
+
+## 4.2 A double-wrap compounds per MESSAGE
+
+Fifty turns of a non-idempotent graft is fifty nested wrappers, each adding latency and a stack
+frame, until something falls over far from the cause. This is the single most likely way a graft
+silently ruins a brainstem, which is why §5 case 7 (50 consecutive turns → exactly ONE wrap,
+counted, not assumed) is the load-bearing test of the whole graft mechanism.
+
+## 4.3 Import-time work is per-turn work
+
+A graft's module level runs on every message. It may check markers and wrap functions. It MUST
+NOT fetch, sleep, read large files, or do anything whose cost the user would feel on every turn.
+Anything expensive belongs inside `perform()`, behind a cache keyed on the host module.
+
+## 4.4 What a graft cannot reach
+
+Agents load after the process is up, so a graft can never patch the boot path: port binding,
+startup, sign-in, the loader itself. Those still require a grail change. A pack that needs one
+MUST say so in `pack.json` (`"requires_grail_change": "<what and why>"`) rather than pretending
+a graft can do it.
