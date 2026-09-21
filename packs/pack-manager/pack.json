@@ -1,0 +1,29 @@
+{
+  "credentials": [],
+  "display_name": "Packs",
+  "files": [
+    {
+      "install_as": "pack_agent.py",
+      "path": "pack_agent.py",
+      "sha256": "fe101ca94d8e9a5936855358c5951fc61921263b7bbae09c3098c52353c2c410"
+    }
+  ],
+  "grafts": [],
+  "hosts": [
+    "brainstem"
+  ],
+  "kind": "pack",
+  "name": "pack-manager",
+  "provides": [
+    "Packs"
+  ],
+  "requires": {
+    "brainstem": ">=0.6.0",
+    "python": ">=3.9.0"
+  },
+  "revert": "delete pack_agent.py from the agents directory, or revert to the previous generation under ~/.brainstem/packs/generations/",
+  "ring": "beta",
+  "schema": "rapp-pack/1",
+  "summary": "Install, update, pin, revert and remove brainstem packs from the signed rapp-packs channel — every byte verified before it is written.",
+  "version": "1.0.0"
+}
