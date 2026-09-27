@@ -1,5 +1,9 @@
 # rapp-packs — the brainstem expansion channel
 
+<!-- rapp1:network-header:start -->
+[![RAPP/1](https://kody-w.github.io/rapp-hive-public/portfolio/badges/rapp-packs.svg)](https://github.com/kody-w/rapp-hive-public/blob/main/portfolio/repos/rapp-packs.md) · **New to RAPP?** [Start here: get your Brainstem →](https://github.com/kody-w/rapp-installer#start-here)
+<!-- rapp1:network-header:end -->
+
 A RAPP brainstem ships as **the grail**: one pristine upstream tree. This repo is how a
 brainstem grows past it — **without ever editing the grail**, and without waiting for a
 release train.
